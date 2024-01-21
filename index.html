@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="time.png" type="image/x-icon">
+    <script src="'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css'"></script>
+    <title></title>
+    <style>
+        @font-face {
+            font-family: 'JetBrains Mono';
+            src: url('fonts/JetBrainsMono-Regular.eot');
+            src: url('fonts/JetBrainsMono-Regular.eot?#iefix') format('embedded-opentype'),
+                url('fonts/JetBrainsMono-Regular.woff2') format('woff2'),
+                url('fonts/JetBrainsMono-Regular.woff') format('woff'),
+                url('fonts/JetBrainsMono-Regular.svg#JetBrainsMono-Regular') format('svg');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'JetBrains Mono';
+            src: url('fonts/JetBrainsMono-Bold.eot');
+            src: url('fonts/JetBrainsMono-Bold.eot?#iefix') format('embedded-opentype'),
+                url('fonts/JetBrainsMono-Bold.woff2') format('woff2'),
+                url('fonts/JetBrainsMono-Bold.woff') format('woff'),
+                url('fonts/JetBrainsMono-Bold.svg#JetBrainsMono-Bold') format('svg');
+            font-weight: bold;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: 'font awesome';
+            src: url('fonts/fa.otf') format('opentype');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            font-size: 2vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: left;
+            height: 100vh;
+            margin: 0;
+            transition: background-color 0.5s, color 0.5s;
+        }
+
+        #time {
+            font-size: 14vw;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #hr,
+        #min,
+        #sec {
+            font-size: 14vw;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            display: inline;
+        }
+
+        #ms {
+            font-size: 8vw;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            display: inline;
+            margin-top: 4vw;
+        }
+
+        #zone-theme {
+            margin-left: 8vw;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: normal;
+            display: flex;
+            align-items: center;
+            /* Align with the toggle switch */
+        }
+
+        #date {
+            margin-left: 8vw;
+            font-weight: normal;
+            position: sticky;
+            left: 0;
+            text-align: left;
+        }
+
+        #utc-time {
+            position: absolute;
+            text-align: right;
+            right: 8vw;
+        }
+
+        #theme {
+            background: none;
+            border: none;
+            cursor: pointer;
+            outline: none;
+        }
+
+        #themeIcon {
+            width: 50px;
+            height: 50px;
+        }
+
+        .light-mode {
+            --bg-color: #fff;
+            --text-color: #000;
+        }
+
+        /* Dark Mode */
+        .dark-mode {
+            --bg-color: #000;
+            --text-color: #fff;
+        }
+
+        /* Toggle Switch Styles */
+        .toggle-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .toggle-switch {
+            position: relative;
+            cursor: pointer;
+            margin-right: 10px;
+            /* Adjust margin as needed */
+        }
+
+        .toggle-switch input {
+            display: none;
+        }
+
+        .toggle-slider {
+            width: 40px;
+            height: 20px;
+            background-color: white;
+            border-radius: 20px;
+            top: 0;
+            left: 0;
+            transition: 0.4s;
+
+            border: #888 solid 1px;
+        }
+
+        .toggle-slider:before {
+            content: "\f185";
+            font-family: 'font awesome';
+            font-size: 16px;
+            color: black;
+            background-color: white !important;
+            position: absolute;
+            left: 2.5px;
+            bottom: 2.5px;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.toggle-slider:before {
+            content: "\f186";
+            font-family: 'font awesome';
+            font-size: 16px;
+            color: white;
+            background-color: black !important;
+            position: absolute;
+            left: 2.5px;
+            bottom: 2.5px;
+            transition: 0.4s;
+            border-radius: 50%;
+
+        }
+
+        input:checked+.toggle-slider {
+            background-color: #000;
+
+            /* Toggle switch color when ON */
+        }
+
+        input:checked+.toggle-slider:before {
+            transform: translateX(20px);
+            /* Move the circle to the right when ON */
+        }
+
+        /* Change color when OFF */
+        input:not(:checked)+.toggle-slider:before {
+            background-color: #000;
+            /* Change the color when OFF */
+        }
+
+        /* Animation on Toggle
+        .toggle-slider:active:before {
+            transform: scale(1.2);
+        } */
+    </style>
+</head>
+
+<body>
+    <div id="date"></div>
+    <div id="time">
+        <div id="hr"></div>
+        <div id="min"></div>
+        <div id="sec"></div>
+        <div id="ms"></div>
+    </div>
+
+    <div id="zone-theme">
+        <span id="theme">
+            <span class="toggle-container">
+                <label class="toggle-switch">
+                    <input type="checkbox" onclick="toggleTheme();">
+                    <div class="toggle-slider"></div>
+                </label>
+                <!-- Add more flex items here if needed -->
+            </span>
+        </span>
+        <div id="zone"></div>
+        <div id="utc-time"></div>
+    </div>
+
+    <script>
+        let theme = "light";
+
+        function padZone(num) {
+            if (num >= 0) {
+                return "+" + num.toString().padStart(2, "0");
+            } else {
+                return "-" + num.toString().padStart(2, "0");
+            }
+        }
+
+        function toggleTheme() {
+            if (theme === "light") {
+                theme = "dark";
+            } else {
+                theme = "light";
+            }
+            document.body.classList.toggle("dark-mode");
+        }
+
+        function getTime() {
+            let date = new Date();
+            let day = date.getDate();
+            let month = (date.getMonth() + 1).toString().padStart(2, "0");
+            let year = date.getFullYear();
+
+            let hour = date.getHours().toString().padStart(2, "0");
+            let min = date.getMinutes().toString().padStart(2, "0");
+            let sec = date.getSeconds().toString().padStart(2, "0");
+            let ms = date.getMilliseconds().toString().padStart(3, "0").slice(0, 2);
+
+            let zone = date.getTimezoneOffset();
+            let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            /* global `theme` */
+            theme = date.getHours() > 8 && date.getHours() < 18 ? "light" : "dark";
+
+            document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
+            document.getElementById("hr").innerHTML = hour + ":";
+            document.getElementById("min").innerHTML = min + ":";
+            document.getElementById("sec").innerHTML = sec + ".";
+            document.getElementById("ms").innerHTML = ms;
+
+            document.title = `${hour}:${min}:${sec} ${padZone(-zone)}`;
+
+            let offset = padZone(-zone) + ":" + (-zone % 60).toString().padStart(2, "0");
+            document.getElementById("zone").innerHTML = `${zone_name} (UTC${offset})`;
+
+            document.getElementById("utc-time").innerHTML = `${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}.${date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2)} UTC`;
+        }
+
+        setInterval(getTime, 10);
+        // document.getElementById("theme").innerHTML = theme;
+    </script>
+</body>
+
+</html>
