@@ -80,7 +80,8 @@
             margin-top: 4vw;
         }
 
-        #zone-theme, #source-time-container {
+        #zone-theme,
+        #source-time-container {
             margin-left: 8vw;
             font-family: 'JetBrains Mono', monospace;
             font-weight: normal;
@@ -97,7 +98,8 @@
             text-align: left;
         } */
 
-        #utc-time, #source {
+        #utc-time,
+        #source {
             position: absolute;
             text-align: right;
             right: 8vw;
@@ -138,9 +140,19 @@
             display: none;
         }
 
+        #source::after {
+            content: " (click to change)";
+            font-size: 1vw;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: normal;
+            transition: 0.5s;
+        }
+
         .toggle-slider {
             width: 2.5em;
-            height: 1.2em /* no idea why, but 1.2em works best */;
+            height: 1.2em
+                /* no idea why, but 1.2em works best */
+            ;
             background-color: white;
             border-radius: 1.25em;
             top: 0;
@@ -151,7 +163,8 @@
         }
 
         .toggle-slider:before {
-            content: "\f185"; /* sun icon */
+            content: "\f185";
+            /* sun icon */
             font-family: 'font awesome';
             font-size: 1em;
             color: black;
@@ -163,8 +176,9 @@
             border-radius: 50%;
         }
 
-        input:checked + .toggle-slider:before {
-            content: "\f186"; /* moon icon */
+        input:checked+.toggle-slider:before {
+            content: "\f186";
+            /* moon icon */
             font-family: 'font awesome';
             font-size: 1em;
             color: white;
@@ -177,19 +191,19 @@
 
         }
 
-        input:checked + .toggle-slider {
+        input:checked+.toggle-slider {
             background-color: #000;
 
             /* Toggle switch color when ON */
         }
 
-        input:checked + .toggle-slider:before {
+        input:checked+.toggle-slider:before {
             transform: translateX(1.25em);
             /* Move the circle to the right when ON */
         }
 
         /* Change color when OFF */
-        input:not(:checked) + .toggle-slider:before {
+        input:not(:checked)+.toggle-slider:before {
             background-color: #000;
             /* Change the color when OFF */
         }
@@ -198,13 +212,15 @@
         .toggle-slider:active:before {
             transform: scale(1.5);
         }
+
+        #source.no-after::after{content:"";}
     </style>
 </head>
 
 <body>
     <div id="source-time-container">
         <div id="date"></div>
-        <div id="source"></div>
+        <div id="source" onclick="switch_source();"></div>
     </div>
 
     <div id="time">
@@ -229,6 +245,7 @@
     </div>
 
     <script>
+        let local = false;
         let theme = "light";
         let ms = 0;
 
@@ -240,6 +257,21 @@
             }
         }
 
+        function switch_source() {
+            local = !local;
+
+            document.getElementById("source").classList.add("no-after");
+
+
+            if (local === true) {
+                document.getElementById("source").innerHTML = "source: new Date();";
+            } else {
+                document.getElementById("source").innerHTML = "source: worldtimeapi.org";
+            }
+
+            getTime();
+        }
+
         function toggleTheme() {
             if (theme === "light") {
                 theme = "dark";
@@ -249,10 +281,44 @@
             document.body.classList.toggle("dark-mode");
         }
 
+        function local_get() {
+            console.log("Switching to local time")
+            let date = new Date();
+            let year = date.getFullYear().toString().padStart(2, "0");
+            let month = (date.getMonth() + 1).toString().padStart(2, "0");
+            let day = date.getDate().toString().padStart(2, "0");
+
+            let hour = date.getHours().toString().padStart(2, "0");
+            let min = date.getMinutes().toString().padStart(2, "0");
+            let sec = date.getSeconds().toString().padStart(2, "0");
+            let ms = date.getMilliseconds().toString().padStart(2, "0").slice(0, 2);
+
+            document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
+            document.getElementById("hr").innerHTML = hour + ":";
+            document.getElementById("min").innerHTML = min + ":";
+            document.getElementById("sec").innerHTML = sec;
+            document.getElementById("ms").innerHTML = "." + ms;
+
+            let offset = date.getTimezoneOffset();
+            let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+            let offsetFormatted = `${padZone(offset / 60)}:${(offset % 60).toString().padStart(2, "0")}`;
+
+            document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
+
+            document.getElementById("utc-time").innerHTML = `UTC ${date.getUTCHours().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCMinutes().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCSeconds().toString().padStart(2, "0").slice(0, 2)}.${date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2)}`;
+            document.getElementById("source").innerHTML = "source: new Date();";
+
+            document.title = `${hour}:${min}:${sec}`;
+        }
+
         function getTime() {
             let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-            const response = fetch(`https://worldtimeapi.org/api/timezone/${zone_name}`, Headers = {
+            if (local === true) {
+                local_get();
+            } else {
+                const response = fetch(`https://worldtimeapi.org/api/timezone/${zone_name}`, Headers = {
                 "Accept": "application/json",
                 "Access-Control-Allow-Origin": "*"
             })
@@ -292,42 +358,22 @@
                     document.title = `${hour}:${min}:${sec}`;
                 })
                 .catch(error => {
-                    console.log("Switching to local time")
-                    let date = new Date();
-                    let year = date.getFullYear().toString().padStart(2, "0");
-                    let month = (date.getMonth() + 1).toString().padStart(2, "0");
-                    let day = date.getDate().toString().padStart(2, "0");
-
-                    let hour = date.getHours().toString().padStart(2, "0");
-                    let min = date.getMinutes().toString().padStart(2, "0");
-                    let sec = date.getSeconds().toString().padStart(2, "0");
-                    let ms = date.getMilliseconds().toString().padStart(2, "0").slice(0, 2);
-
-                    document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
-                    document.getElementById("hr").innerHTML = hour + ":";
-                    document.getElementById("min").innerHTML = min + ":";
-                    document.getElementById("sec").innerHTML = sec;
-                    document.getElementById("ms").innerHTML = "." + ms;
-
-                    let offset = date.getTimezoneOffset();
-                    let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                    
-                    let offsetFormatted = `${padZone(offset / 60)}:${(offset % 60).toString().padStart(2, "0")}`;
-
-                    document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
-
-                    document.getElementById("utc-time").innerHTML = `UTC ${date.getUTCHours().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCMinutes().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCSeconds().toString().padStart(2, "0").slice(0, 2)}.${date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2)}`;
-                    document.getElementById("source").innerHTML = "source: new Date();";
-
-                    document.title = `${hour}:${min}:${sec}`;
+                    local_get();
                 });
+            }
 
             
+            document.addEventListener("keydown", function (event) {
+                if (event.key === "l") {
+                    local = true;
+                    local_get();
+                }
+            });
 
 
         }
 
-        
+
 
         setInterval(getTime, 10);
 
