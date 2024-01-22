@@ -39,6 +39,12 @@
             font-display: swap;
         }
 
+        body.dark-emergency {
+            --bg-color: #000;
+            --text-color: #fff;
+            transition: none !important;
+        }
+
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
@@ -141,7 +147,7 @@
         }
 
         #source::after {
-            content: " (click to change)";
+            content: " (click to change, if possible)";
             font-size: 1vw;
             font-family: 'JetBrains Mono', monospace;
             font-weight: normal;
@@ -234,7 +240,7 @@
         <span id="theme">
             <span class="toggle-container">
                 <label class="toggle-switch">
-                    <input type="checkbox" onclick="toggleTheme();">
+                    <input id="checker-actual" type="checkbox" onclick="toggleTheme();">
                     <div class="toggle-slider"></div>
                 </label>
                 <!-- Add more flex items here if needed -->
@@ -273,6 +279,7 @@
         }
 
         function toggleTheme() {
+            document.body.classList.remove("dark-emergency");
             if (theme === "light") {
                 theme = "dark";
             } else {
@@ -373,12 +380,17 @@
 
         }
 
-
-
         setInterval(getTime, 10);
 
+        document.addEventListener("DOMContentLoaded", function() {
+            const switchToggle = document.getElementById("checker-actual");
+            const theme = switchToggle.checked ? "dark" : "light";
+            if (theme === "dark") {
+                document.body.classList.add("dark-emergency");
+                document.body.classList.add("dark-mode");
+            }
+        });
 
-        // document.getElementById("theme").innerHTML = theme;
     </script>
 </body>
 
