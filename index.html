@@ -252,7 +252,10 @@
         function getTime() {
             let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-            const response = fetch(`https://worldtimeapi.org/api/timezone/${zone_name}`)
+            const response = fetch(`https://worldtimeapi.org/api/timezone/${zone_name}`, Headers = {
+                "Accept": "application/json",
+                "Access-Control-Allow-Origin": "*"
+            })
                 .then(response => response.json())
                 .then(data => {
                     let offset = data.utc_offset;
