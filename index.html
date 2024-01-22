@@ -271,7 +271,7 @@
                     document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
 
 
-                    document.getElementById("utc-time").innerHTML = utcTime;
+                    document.getElementById("utc-time").innerHTML = `UTC ${utcTime.substring(11, 13).padStart(2, "0").slice(0, 2)}:${utcTime.substring(14, 16).padStart(2, "0").slice(0, 2)}:${utcTime.substring(17, 19).padStart(2, "0").slice(0, 2)}.${utcTime.substring(20, 22).padStart(2, "0").slice(0, 2)}`;
 
                     let year = date_string.substring(0, 4);
                     let month = date_string.substring(5, 7);
