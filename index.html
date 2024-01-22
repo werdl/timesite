@@ -270,8 +270,8 @@
             document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
             document.getElementById("hr").innerHTML = hour + ":";
             document.getElementById("min").innerHTML = min + ":";
-            document.getElementById("sec").innerHTML = sec + ".";
-            document.getElementById("ms").innerHTML = ms;
+            document.getElementById("sec").innerHTML = sec;
+            document.getElementById("ms").innerHTML = "." + ms;
 
             document.title = `${hour}:${min}:${sec} ${padZone(-zone)}`;
 
