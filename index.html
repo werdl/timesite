@@ -136,7 +136,7 @@
         .toggle-switch {
             position: relative;
             cursor: pointer;
-            margin-right: 10px;
+            margin-right: 1em;
             /* Adjust margin as needed */
         }
 
@@ -145,65 +145,65 @@
         }
 
         .toggle-slider {
-            width: 40px;
-            height: 20px;
+            width: 2.5em;
+            height: 1.2em /* no idea why, but 1.2em works best */;
             background-color: white;
-            border-radius: 20px;
+            border-radius: 1.25em;
             top: 0;
             left: 0;
             transition: 0.4s;
 
-            border: #888 solid 1px;
+            border: 0.063em solid #888;
         }
 
         .toggle-slider:before {
-            content: "\f185";
+            content: "\f185"; /* sun icon */
             font-family: 'font awesome';
-            font-size: 16px;
+            font-size: 1em;
             color: black;
             background-color: white !important;
             position: absolute;
-            left: 2.5px;
-            bottom: 2.5px;
-            transition: 0.4s;
+            left: 0.156em;
+            bottom: 0.156em;
+            transition: 0.5s;
             border-radius: 50%;
         }
 
-        input:checked+.toggle-slider:before {
-            content: "\f186";
+        input:checked + .toggle-slider:before {
+            content: "\f186"; /* moon icon */
             font-family: 'font awesome';
-            font-size: 16px;
+            font-size: 1em;
             color: white;
             background-color: black !important;
             position: absolute;
-            left: 2.5px;
-            bottom: 2.5px;
-            transition: 0.4s;
+            left: 0.156em;
+            bottom: 0.156em;
+            transition: 0.5s;
             border-radius: 50%;
 
         }
 
-        input:checked+.toggle-slider {
+        input:checked + .toggle-slider {
             background-color: #000;
 
             /* Toggle switch color when ON */
         }
 
-        input:checked+.toggle-slider:before {
-            transform: translateX(20px);
+        input:checked + .toggle-slider:before {
+            transform: translateX(1.25em);
             /* Move the circle to the right when ON */
         }
 
         /* Change color when OFF */
-        input:not(:checked)+.toggle-slider:before {
+        input:not(:checked) + .toggle-slider:before {
             background-color: #000;
             /* Change the color when OFF */
         }
 
-        /* Animation on Toggle
+        /* Animation on Toggle */
         .toggle-slider:active:before {
-            transform: scale(1.2);
-        } */
+            transform: scale(1.5);
+        }
     </style>
 </head>
 
