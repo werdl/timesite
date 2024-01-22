@@ -111,11 +111,6 @@
             outline: none;
         }
 
-        #themeIcon {
-            width: 50px;
-            height: 50px;
-        }
-
         .light-mode {
             --bg-color: #fff;
             --text-color: #000;
@@ -251,34 +246,49 @@
         }
 
         function getTime() {
-            let date = new Date();
-            let day = date.getDate();
-            let month = (date.getMonth() + 1).toString().padStart(2, "0");
-            let year = date.getFullYear();
+            fetch('https://worldtimeapi.org/api/timezone/Europe/London')
+                .then(response => response.json())
+                .then(data => {
+                    let offset = data.utc_offset;
+                    let utcTime = data.utc_datetime;
 
-            let hour = date.getHours().toString().padStart(2, "0");
-            let min = date.getMinutes().toString().padStart(2, "0");
-            let sec = date.getSeconds().toString().padStart(2, "0");
-            let ms = date.getMilliseconds().toString().padStart(3, "0").slice(0, 2);
+                    let zone = offset.substring(0, 3);
+                    let offsetMinutes = offset.substring(4);
+                    let offsetFormatted = `${zone}:${offsetMinutes}`;
 
-            let zone = date.getTimezoneOffset();
-            let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
+                    document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
+                    document.getElementById("utc-time").innerHTML = utcTime;
 
-            /* global `theme` */
-            theme = date.getHours() > 8 && date.getHours() < 18 ? "light" : "dark";
+                    let date = new Date();
+                    let day = date.getDate().toString().padStart(2, "0");
+                    let month = (date.getMonth() + 1).toString().padStart(2, "0");
+                    let year = date.getFullYear();
 
-            document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
-            document.getElementById("hr").innerHTML = hour + ":";
-            document.getElementById("min").innerHTML = min + ":";
-            document.getElementById("sec").innerHTML = sec;
-            document.getElementById("ms").innerHTML = "." + ms;
+                    let hour = date.getHours().toString().padStart(2, "0");
+                    let min = date.getMinutes().toString().padStart(2, "0");
+                    let sec = date.getSeconds().toString().padStart(2, "0");
+                    let ms = date.getMilliseconds().toString().padStart(3, "0").slice(0, 2);
 
-            document.title = `${hour}:${min}:${sec} ${padZone(-zone)}`;
+                    let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-            let offset = padZone(-zone) + ":" + (-zone % 60).toString().padStart(2, "0");
-            document.getElementById("zone").innerHTML = `${zone_name} (UTC${offset})`;
+                    /* global `theme` */
+                    theme = date.getHours() > 8 && date.getHours() < 18 ? "light" : "dark";
 
-            document.getElementById("utc-time").innerHTML = `${date.getUTCHours().toString().padStart(2, "0")}:${date.getUTCMinutes().toString().padStart(2, "0")}:${date.getUTCSeconds().toString().padStart(2, "0")}.${date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2)} UTC`;
+                    document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
+                    document.getElementById("hr").innerHTML = hour + ":";
+                    document.getElementById("min").innerHTML = min + ":";
+                    document.getElementById("sec").innerHTML = sec;
+                    document.getElementById("ms").innerHTML = "." + ms;
+
+                    document.title = `${hour}:${min}:${sec}`;
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+
+            
+
+
         }
 
         setInterval(getTime, 10);
