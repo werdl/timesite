@@ -1,0 +1,273 @@
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('fonts/JetBrainsMono-Regular.eot');
+    src: url('fonts/JetBrainsMono-Regular.eot?#iefix') format('embedded-opentype'),
+        url('fonts/JetBrainsMono-Regular.woff2') format('woff2'),
+        url('fonts/JetBrainsMono-Regular.woff') format('woff'),
+        url('fonts/JetBrainsMono-Regular.svg#JetBrainsMono-Regular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'JetBrains Mono';
+    src: url('fonts/JetBrainsMono-Bold.eot');
+    src: url('fonts/JetBrainsMono-Bold.eot?#iefix') format('embedded-opentype'),
+        url('fonts/JetBrainsMono-Bold.woff2') format('woff2'),
+        url('fonts/JetBrainsMono-Bold.woff') format('woff'),
+        url('fonts/JetBrainsMono-Bold.svg#JetBrainsMono-Bold') format('svg');
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: 'font awesome';
+    src: url('fonts/fa.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+body.dark-emergency {
+    --bg-color: #000;
+    --text-color: #fff;
+    transition: none !important;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    font-size: 2vw;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: left;
+    height: 100vh;
+    margin: 0;
+    transition: background-color 0.5s, color 0.5s;
+}
+
+#time {
+    font-size: 14vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+#hr,
+#min,
+#sec {
+    font-size: 14vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    display: inline;
+}
+
+#ms {
+    font-size: 8vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    display: inline;
+    margin-top: 4vw;
+}
+
+#zone-theme,
+#source-time-container {
+    margin-left: 8vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: normal;
+    display: flex;
+    align-items: center;
+    /* Align with the toggle switch */
+}
+
+/* #date {
+    margin-left: 8vw;
+    font-weight: normal;
+    position: sticky;
+    left: 0;
+    text-align: left;
+} */
+
+#utc-time-container,
+#source {
+    position: absolute;
+    text-align: right;
+    right: 8vw;
+    display: flex;
+}
+
+#source::after {
+    margin-top: 1vw;
+}
+
+#utc-ms {
+    margin-left: 0 !important;
+}
+
+#theme {
+    background: none;
+    border: none;
+    cursor: pointer;
+    outline: none;
+}
+
+.light-mode {
+    --bg-color: #fff;
+    --text-color: #000;
+}
+
+/* Dark Mode */
+.dark-mode {
+    --bg-color: #000;
+    --text-color: #fff;
+}
+
+/* Toggle Switch Styles */
+.toggle-container {
+    display: flex;
+    align-items: center;
+}
+
+.toggle-switch {
+    position: relative;
+    cursor: pointer;
+    margin-right: 1em;
+    /* Adjust margin as needed */
+}
+
+.toggle-switch input {
+    display: none;
+}
+
+#source::after {
+    content: " (click to change, if possible)";
+    font-size: 1vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: normal;
+    transition: 0.5s;
+    float: bottom;
+}
+
+.toggle-slider {
+    width: 2.5em;
+    height: 1.2em
+        /* no idea why, but 1.2em works best */
+    ;
+    background-color: white;
+    border-radius: 1.25em;
+    top: 0;
+    left: 0;
+    transition: 0.4s;
+
+    border: 0.063em solid #888;
+}
+
+.toggle-slider:before {
+    content: "\f185";
+    /* sun icon */
+    font-family: 'font awesome';
+    font-size: 1em;
+    color: black;
+    background-color: white !important;
+    position: absolute;
+    left: 0.156em;
+    bottom: 0.156em;
+    transition: 0.5s;
+    border-radius: 50%;
+}
+
+input:checked+.toggle-slider:before {
+    content: "\f186";
+    /* moon icon */
+    font-family: 'font awesome';
+    font-size: 1em;
+    color: white;
+    background-color: black !important;
+    position: absolute;
+    left: 0.156em;
+    bottom: 0.156em;
+    transition: 0.5s;
+    border-radius: 50%;
+
+}
+
+input:checked+.toggle-slider {
+    background-color: #000;
+
+    /* Toggle switch color when ON */
+}
+
+input:checked+.toggle-slider:before {
+    transform: translateX(1.25em);
+    /* Move the circle to the right when ON */
+}
+
+/* Change color when OFF */
+input:not(:checked)+.toggle-slider:before {
+    background-color: #000;
+    /* Change the color when OFF */
+}
+
+/* Animation on Toggle */
+.toggle-slider:active:before {
+    transform: scale(1.5);
+}
+
+#source.no-after::after {
+    content: "";
+}
+
+#alert-banner {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 4vw;
+    background-color: #ff0000;
+    color: #fff;
+    font-size: 2vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    transition: 0.5s;
+    z-index: 100;
+}
+
+#nav {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 4vw;
+    font-size: 2vw;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: bold;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.5s;
+}
+
+#nav a {
+    margin-right: 1vw;
+}
+
+#nav sep {
+    margin-right: 1vw;
+}
+#nav a:last-child::after {
+    content: "";
+}
+
+#nav a:last-child {
+    margin-right: 0;
+}

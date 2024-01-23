@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Help!</title>
+    <link rel="stylesheet" href="index.css">
+    <style>
+        
+
+        #main {
+
+
+            position: absolute;
+            top: 5vw;
+            list-style-type: none;
+            font-size: 1vw;
+
+            display: flex;
+            flex-direction: row;
+        }
+
+        @media (max-width: 768px) {
+            #main {
+                flex-direction: column;
+            }
+        }
+
+        code {
+            background-color: #ccc;
+            padding: 0.1vw;
+            border-radius: 0.2vw;
+            color: black;
+        }
+
+        #binds h1 {
+            margin-left: 2vw;
+            min-width: 50vw;
+        }
+
+        ul {
+            list-style-type: none; /* Removed bullet points */
+            padding-left: 2vw;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="nav">
+        <a href="index.html">time</a>
+        <sep>|</sep>
+        <a href="https://github.com/werdl/timesite">github</a>
+    </div>
+    <div id="zone-theme">
+        <span id="theme">
+            <span class="toggle-container">
+                <label class="toggle-switch">
+                    <input id="checker-actual" type="checkbox" onclick="toggleTheme();">
+                    <div class="toggle-slider"></div>
+                </label>
+                <!-- Add more flex items here if needed -->
+            </span>
+        </span>
+    </div>
+
+    <div id="main">
+        <div id="binds">
+            <h1>keybindings</h1>
+            <ul>
+                <li><code>l</code> - toggle local mode and switch source</li>
+                <li><code>t</code> - toggle theme</li>
+                <li><code>n</code> - reset text color to default</li>
+                <li><code>a</code> - change color to aqua</li>
+                <li><code>b</code> - change color to blue</li>
+                <li><code>c</code> - change color to cyan</li>
+                <li><code>g</code> - change color to gold</li>
+                <li><code>i</code> - change color to indigo</li>
+                <li><code>l</code> - change color to lime</li>
+                <li><code>m</code> - change color to magenta</li>
+                <li><code>o</code> - change color to orange</li>
+                <li><code>p</code> - change color to purple</li>
+                <li><code>r</code> - change color to red</li>
+                <li><code>s</code> - change color to silver</li>
+                <li><code>t</code> - change color to teal</li>
+                <li><code>v</code> - change color to violet</li>
+                <li><code>y</code> - change color to yellow</li>
+            </ul>
+        </div>
+
+        <div id="how">
+            <h1>how it works</h1>
+            <p>
+                the time is fetched from either an api, or a local Date() object. it utilises round trip time
+                calculation, and makes exactly one request every second to the api. if it becomes too slow, it swaps to
+                a local Date() object. every two seconds, if there has been a problem with the api, it tries again. if
+                it succeeds, it swaps back to the api. if it fails, it continues to use the local Date() object.
+            </p>
+            <br>
+            <br>
+            <h1>thanks</h1>
+            <p>
+                thanks to uimaxbai/downloadfirefox - find him <a href="https://github.com/uimaxbai">here</a> on github -
+                for the project idea.
+            </p>
+        </div>
+
+
+    </div>
+
+    <script>
+        function toggleTheme() {
+            console.log("theme");
+
+            document.body.classList.remove("dark-emergency");
+            if (theme === "light") {
+                theme = "dark";
+                document.getElementById("checker-actual").checked = true;
+            } else {
+                theme = "light";
+                document.getElementById("checker-actual").checked = false;
+
+            }
+            document.body.classList.toggle("dark-mode");
+
+            // save theme in local storage
+            localStorage.setItem("theme", theme);
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // get theme from local storage
+            theme = localStorage.getItem("theme");
+            if (theme === null) {
+                theme = "light";
+            }
+
+            if (theme === "dark") {
+                document.body.classList.add("dark-emergency");
+            }
+            document.body.classList.toggle("dark-mode", theme === "dark");
+
+            // set the toggle switch to the correct position
+            document.getElementById("checker-actual").checked = theme === "dark";
+        });
+    </script>
+</body>
+
+</html>
