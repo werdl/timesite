@@ -104,11 +104,16 @@
             text-align: left;
         } */
 
-        #utc-time,
+        #utc-time-container,
         #source {
             position: absolute;
             text-align: right;
             right: 8vw;
+            display: flex;
+        }
+
+        #utc-ms {
+            margin-left: 0 !important;
         }
 
         #theme {
@@ -152,6 +157,7 @@
             font-family: 'JetBrains Mono', monospace;
             font-weight: normal;
             transition: 0.5s;
+            float: bottom;
         }
 
         .toggle-slider {
@@ -219,11 +225,35 @@
             transform: scale(1.5);
         }
 
-        #source.no-after::after{content:"";}
+        #source.no-after::after {
+            content: "";
+        }
+
+        #alert-banner {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4vw;
+            background-color: #ff0000;
+            color: #fff;
+            font-size: 2vw;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: bold;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            transition: 0.5s;
+            z-index: 100;
+
+        }
     </style>
 </head>
 
 <body>
+    <div id="alert-banner">
+        <div id="alert-banner-text"></div>
+    </div>
     <div id="source-time-container">
         <div id="date"></div>
         <div id="source" onclick="switch_source();"></div>
@@ -247,13 +277,25 @@
             </span>
         </span>
         <div id="zone"></div>
-        <div id="utc-time"></div>
+        <div id="utc-time-container">
+            <span id="utc-time"></span>
+            <span id="utc-ms"></span>
+        </div>
     </div>
 
     <script>
         let local = false;
+        let local_because_api_failed = false;
         let theme = "light";
         let ms = 0;
+
+        function alert_banner(text) {
+            document.getElementById("alert-banner-text").innerHTML = text;
+            document.getElementById("alert-banner").style.display = "flex";
+            setTimeout(function () {
+                document.getElementById("alert-banner").style.display = "none";
+            }, 5000);
+        }
 
         function padZone(num) {
             if (num >= 0) {
@@ -264,7 +306,13 @@
         }
 
         function switch_source() {
+            if (local === true) {
+                local_because_api_failed = false;
+            }
+
             local = !local;
+
+
 
             document.getElementById("source").classList.add("no-after");
 
@@ -286,9 +334,25 @@
                 theme = "light";
             }
             document.body.classList.toggle("dark-mode");
+
+            // save theme in local storage
+            localStorage.setItem("theme", theme);
         }
 
         function local_get() {
+            console.log("local_get() called");
+
+            if (local_because_api_failed === true) {
+                api_attempts++;
+            }
+
+            if (api_attempts > 100 && local_because_api_failed === true) {
+                local = false;
+                local_because_api_failed = false;
+                api_attempts = 0;
+                getTime();
+            }
+
             console.log("Switching to local time")
             let date = new Date();
             let year = date.getFullYear().toString().padStart(2, "0");
@@ -313,11 +377,16 @@
 
             document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
 
-            document.getElementById("utc-time").innerHTML = `UTC ${date.getUTCHours().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCMinutes().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCSeconds().toString().padStart(2, "0").slice(0, 2)}.${date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2)}`;
+            document.getElementById("utc-time").innerHTML = `UTC ${date.getUTCHours().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCMinutes().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCSeconds().toString().padStart(2, "0").slice(0, 2)}`.trim();
+
+            document.getElementById("utc-ms").innerText = "." + date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2);
             document.getElementById("source").innerHTML = "source: new Date();";
 
             document.title = `${hour}:${min}:${sec}`;
         }
+
+        let api_attempts = 0;
+        let displayed = false;
 
         function getTime() {
             let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -325,51 +394,79 @@
             if (local === true) {
                 local_get();
             } else {
+                let start_time = new Date().getTime();
                 const response = fetch(`https://worldtimeapi.org/api/timezone/${zone_name}`, Headers = {
-                "Accept": "application/json",
-                "Access-Control-Allow-Origin": "*"
-            })
-                .then(response => response.json())
-                .then(data => {
-                    let offset = data.utc_offset;
-                    let utcTime = data.utc_datetime;
-
-                    let date_string = data.datetime;
-
-                    let zone = offset.substring(0, 3);
-
-                    let offsetMinutes = offset.substring(4);
-                    let offsetFormatted = `${zone}:${offsetMinutes}`;
-
-                    document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
-
-
-                    document.getElementById("utc-time").innerHTML = `UTC ${utcTime.substring(11, 13).padStart(2, "0").slice(0, 2)}:${utcTime.substring(14, 16).padStart(2, "0").slice(0, 2)}:${utcTime.substring(17, 19).padStart(2, "0").slice(0, 2)}.${utcTime.substring(20, 22).padStart(2, "0").slice(0, 2)}`;
-
-                    let year = date_string.substring(0, 4);
-                    let month = date_string.substring(5, 7);
-                    let day = date_string.substring(8, 10);
-
-                    let hour = date_string.substring(11, 13);
-                    let min = date_string.substring(14, 16);
-                    let sec = date_string.substring(17, 19);
-                    ms = date_string.substring(20, 22);
-
-                    document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
-                    document.getElementById("hr").innerHTML = hour + ":";
-                    document.getElementById("min").innerHTML = min + ":";
-                    document.getElementById("sec").innerHTML = sec;
-                    document.getElementById("ms").innerHTML = "." + ms;
-                    document.getElementById("source").innerHTML = "source: worldtimeapi.org";
-
-                    document.title = `${hour}:${min}:${sec}`;
+                    "Accept": "application/json",
+                    "Access-Control-Allow-Origin": "*"
                 })
-                .catch(error => {
-                    local_get();
-                });
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("API call successful");
+                        let end_time = new Date().getTime();
+
+                        let offset = data.utc_offset;
+                        let utcTime = data.utc_datetime;
+
+                        let date_string = data.datetime;
+
+                        let zone = offset.substring(0, 3);
+
+                        let offsetMinutes = offset.substring(4);
+                        let offsetFormatted = `${zone}:${offsetMinutes}`;
+
+                        document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
+
+                        let year = date_string.substring(0, 4);
+                        let month = date_string.substring(5, 7);
+                        let day = date_string.substring(8, 10);
+
+                        let hour = date_string.substring(11, 13);
+                        let min = date_string.substring(14, 16);
+                        let sec = date_string.substring(17, 19);
+                        ms = parseInt(date_string.substring(20, 22));
+
+                        let round_trip_time = end_time - start_time;
+
+                        if ((ms + round_trip_time) > 1000) {
+                            alert_banner("API is slow, switching to local time");
+                            local = true;
+                            local_because_api_failed = true;
+                            local_get();
+                            return;
+                        } else {
+                            ms += round_trip_time;
+                        }
+
+                        if (ms >= 100) {
+                            ms -= 100;
+                        }
+
+                        document.getElementById("utc-time").innerHTML = `UTC ${utcTime.substring(11, 13).padStart(2, "0").slice(0, 2)}:${utcTime.substring(14, 16).padStart(2, "0").slice(0, 2)}:${utcTime.substring(17, 19).padStart(2, "0").slice(0, 2)}`.trim();
+
+                        document.getElementById("utc-ms").innerText = "." + utcTime.substring(20, 22).padStart(2, "0").slice(0, 2);
+
+                        document.getElementById("date").innerHTML = day + "/" + month + "/" + year;
+                        document.getElementById("hr").innerHTML = hour + ":";
+                        document.getElementById("min").innerHTML = min + ":";
+                        document.getElementById("sec").innerHTML = sec;
+                        document.getElementById("ms").innerHTML = "." + ms;
+                        document.getElementById("source").innerHTML = "source: worldtimeapi.org";
+
+                        document.title = `${hour}:${min}:${sec}`;
+                    })
+                    .catch(error => {
+                        if (local === false && !displayed) {
+                            alert_banner("API failed, switching to local time");
+                            displayed = true;
+                        }
+                        local = true;
+                        local_because_api_failed = true;
+
+                        local_get();
+                    });
             }
 
-            
+
             document.addEventListener("keydown", function (event) {
                 if (event.key === "l") {
                     local = true;
@@ -380,15 +477,33 @@
 
         }
 
-        setInterval(getTime, 10);
-
-        document.addEventListener("DOMContentLoaded", function() {
-            const switchToggle = document.getElementById("checker-actual");
-            const theme = switchToggle.checked ? "dark" : "light";
-            if (theme === "dark") {
-                document.body.classList.add("dark-emergency");
-                document.body.classList.add("dark-mode");
+        function updateMs() {
+            if (ms == 99) {
+                ms = 0;
             }
+            ms++;
+
+            document.getElementById("ms").innerHTML = "." + ms.toString().padStart(2, "0");
+
+            document.getElementById("utc-ms").innerText = "." + ms.toString().padStart(2, "0");
+        }
+
+        getTime();
+        setInterval(getTime, 1000);
+
+        updateMs();
+        setInterval(updateMs, 10);
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // get theme from local storage
+            theme = localStorage.getItem("theme");
+            if (theme === null) {
+                theme = "light";
+            }
+            document.body.classList.toggle("dark-mode", theme === "dark");
+
+            // set the toggle switch to the correct position
+            document.getElementById("checker-actual").checked = theme === "dark";
         });
 
     </script>
