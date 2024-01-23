@@ -160,7 +160,7 @@ body {
     height: 1.2em
         /* no idea why, but 1.2em works best */
     ;
-    background-color: white;
+    background-color: var(--bg-color);
     border-radius: 1.25em;
     top: 0;
     left: 0;
@@ -174,8 +174,8 @@ body {
     /* sun icon */
     font-family: 'font awesome';
     font-size: 1em;
-    color: black;
-    background-color: white !important;
+    color: var(--text-color);
+    background-color: var(--bg-color) !important;
     position: absolute;
     left: 0.156em;
     bottom: 0.156em;
@@ -188,8 +188,8 @@ input:checked+.toggle-slider:before {
     /* moon icon */
     font-family: 'font awesome';
     font-size: 1em;
-    color: white;
-    background-color: black !important;
+    color: var(--text-color);
+    background-color: var(--bg-color) !important;
     position: absolute;
     left: 0.156em;
     bottom: 0.156em;
@@ -255,7 +255,6 @@ input:not(:checked)+.toggle-slider:before {
     justify-content: center;
     align-items: center;
     transition: 0.5s;
-    z-index: 100;
 }
 
 #nav a {

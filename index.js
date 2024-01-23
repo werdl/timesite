@@ -2,6 +2,7 @@ let local = false;
 let local_because_api_failed = false;
 let theme = "light";
 let ms = 0;
+let normal_color = "";
 
 function alert_banner(text) {
     document.getElementById("alert-banner-text").innerHTML = text;
@@ -47,15 +48,19 @@ function toggleTheme() {
     if (theme === "light") {
         theme = "dark";
         document.getElementById("checker-actual").checked = true;
+        normal_color = "black";
     } else {
         theme = "light";
-        document.getElementById("checker-actual").checked = false;
+        normal_color = "white";
 
     }
+
+    normal_color = document.body.style.getPropertyValue('--text-color');
+
     document.body.classList.toggle("dark-mode");
 
     // save theme in local storage
-    localStorage.setItem("theme", theme);
+    setCookie("theme", theme);
 }
 
 function local_get() {
@@ -101,7 +106,7 @@ function local_get() {
     document.getElementById("utc-ms").innerText = "." + date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2);
     document.getElementById("source").innerHTML = "source: new Date();";
 
-    document.title = `${hour}:${min}:${sec}`;
+    document.title = `${hour}:${min}:${sec} ${offsetFormatted}`;
 }
 
 let api_attempts = 0;
@@ -110,6 +115,23 @@ let displayed = false;
 function ensure_ms() {
     ms = parseInt(ms.toString().padStart(2, "0").slice(0, 2));
 }
+
+let colors = {
+    aqua: [0, 255, 255],
+    blue: [0, 0, 255],
+    cyan: [0, 255, 255],
+    gold: [255, 215, 0],
+    indigo: [75, 0, 130],
+    lime: [0, 255, 0],
+    magenta: [255, 0, 255],
+    orange: [255, 165, 0],
+    purple: [128, 0, 128],
+    red: [255, 0, 0],
+    silver: [192, 192, 192],
+    teal: [0, 128, 128],
+    violet: [238, 130, 238],
+    yellow: [255, 255, 0],
+};
 
 function getTime() {
     let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -173,7 +195,7 @@ function getTime() {
                 document.getElementById("ms").innerHTML = "." + ms;
                 document.getElementById("source").innerHTML = "source: worldtimeapi.org";
 
-                document.title = `${hour}:${min}:${sec}`;
+                document.title = `${hour}:${min}:${sec} ${offsetFormatted}`
             })
             .catch(error => {
                 if (local === false && !displayed) {
@@ -200,40 +222,21 @@ function getTime() {
                 break;
 
             case "n":
-                document.body.style.color = "";
+                document.body.style.setProperty('--text-color', normal_color);
+                setCookie("color", normal_color);
                 break;
 
             default:
-                let colors = {
-                    aqua: [0, 255, 255],
-                    blue: [0, 0, 255],
-                    cyan: [0, 255, 255],
-                    gold: [255, 215, 0],
-                    indigo: [75, 0, 130],
-                    lime: [0, 255, 0],
-                    magenta: [255, 0, 255],
-                    orange: [255, 165, 0],
-                    purple: [128, 0, 128],
-                    red: [255, 0, 0],
-                    silver: [192, 192, 192],
-                    teal: [0, 128, 128],
-                    violet: [238, 130, 238],
-                    yellow: [255, 255, 0],
-                };
-
-
-
                 for (let color of Object.keys(colors)) {
                     console.log(color);
                     if (event.key === color[0]) {
 
                         console.log("Changing color to " + color);
 
-                        console.log(`rgb(${Math.round(colors[color][0])}, ${Math.round(colors[color][1])}, ${Math.round(colors[color][2])})`);
+                        document.body.style.setProperty('--text-color', `rgb(${Math.round(colors[color][0])}, ${Math.round(colors[color][1])}, ${Math.round(colors[color][2])})`)
 
-                        document.body.style.color = `rgb(${Math.round(colors[color][0])}, ${Math.round(colors[color][1])}, ${Math.round(colors[color][2])})`;
-                        console.log("Changed color to " + color);
-                        console.log(document.body.style.color);
+                        setCookie("color", color);
+
                     }
                 };
 
@@ -255,6 +258,21 @@ function updateMs() {
     document.getElementById("utc-ms").innerText = "." + (ms % 100).toString().padStart(2, "0");
 }
 
+function setCookie(key, value) {
+    document.cookie = `${key}=${value}; expires=Fri, 31 Dec 9999 23:59:59 GMT`;
+}
+
+function getCookie(key) {
+    let cookies = document.cookie.split("; ");
+    for (let cookie of cookies) {
+        let [name, value] = cookie.split("=");
+        if (name === key) {
+            return value;
+        }
+    }
+    return null;
+}
+
 getTime();
 setInterval(getTime, 1000);
 
@@ -263,7 +281,7 @@ setInterval(updateMs, 10);
 
 document.addEventListener("DOMContentLoaded", function () {
     // get theme from local storage
-    theme = localStorage.getItem("theme");
+    theme = getCookie("theme");
     if (theme === null) {
         theme = "light";
     }
@@ -275,4 +293,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // set the toggle switch to the correct position
     document.getElementById("checker-actual").checked = theme === "dark";
+
+
+    // get color from local storage
+    let color = getCookie("color");
+    if (color === null) {
+        color = "white";
+    }
+
+    document.body.style.setProperty('--text-color', `rgb(${Math.round(colors[color][0])}, ${Math.round(colors[color][1])}, ${Math.round(colors[color][2])})`);
+
 });
