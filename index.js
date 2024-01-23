@@ -116,22 +116,20 @@ function ensure_ms() {
     ms = parseInt(ms.toString().padStart(2, "0").slice(0, 2));
 }
 
-let colors = {
-    aqua: [0, 255, 255],
-    blue: [0, 0, 255],
-    cyan: [0, 255, 255],
-    gold: [255, 215, 0],
-    indigo: [75, 0, 130],
-    lime: [0, 255, 0],
-    magenta: [255, 0, 255],
-    orange: [255, 165, 0],
-    purple: [128, 0, 128],
-    red: [255, 0, 0],
-    silver: [192, 192, 192],
-    teal: [0, 128, 128],
-    violet: [238, 130, 238],
-    yellow: [255, 255, 0],
-};
+let colors = [
+    "aqua",
+    "blue",
+    "cyan",
+    "green",
+    "indigo",
+    "magenta",
+    "orange",
+    "purple",
+    "red",
+    "silver",
+    "violet",
+    "yellow"
+];
 
 function getTime() {
     let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -227,13 +225,13 @@ function getTime() {
                 break;
 
             default:
-                for (let color of Object.keys(colors)) {
+                for (let color of colors) {
                     console.log(color);
                     if (event.key === color[0]) {
 
                         console.log("Changing color to " + color);
 
-                        document.body.style.setProperty('--text-color', `rgb(${Math.round(colors[color][0])}, ${Math.round(colors[color][1])}, ${Math.round(colors[color][2])})`)
+                        document.body.style.setProperty('--text-color', color);
 
                         setCookie("color", color);
 
@@ -298,9 +296,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // get color from local storage
     let color = getCookie("color");
     if (color === null) {
-        color = "white";
+        color = normal_color;
     }
 
-    document.body.style.setProperty('--text-color', `rgb(${Math.round(colors[color][0])}, ${Math.round(colors[color][1])}, ${Math.round(colors[color][2])})`);
+    document.body.style.setProperty('--text-color', color);
 
 });
