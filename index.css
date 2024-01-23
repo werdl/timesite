@@ -255,6 +255,7 @@ input:not(:checked)+.toggle-slider:before {
     justify-content: center;
     align-items: center;
     transition: 0.5s;
+    z-index: 100;
 }
 
 #nav a {
