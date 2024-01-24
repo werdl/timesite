@@ -27,8 +27,6 @@ function switch_source() {
 
     local = !local;
 
-
-
     document.getElementById("source").classList.add("no-after");
 
 
@@ -133,8 +131,8 @@ let colors = [
 
 function getTime() {
     let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    if (local === true) {
+    
+    if (local) {
         local_get();
     } else {
         let start_time = new Date().getTime();
@@ -152,37 +150,36 @@ function getTime() {
 
                 let date_string = data.datetime;
 
-                let zone = offset.substring(0, 3);
+                let date_obj = Date.parse(date_string);
 
-                let offsetMinutes = offset.substring(4);
-                let offsetFormatted = `${zone}:${offsetMinutes}`;
 
-                document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
 
-                let year = date_string.substring(0, 4);
-                let month = date_string.substring(5, 7);
-                let day = date_string.substring(8, 10);
+                let year = date_string.substring(0, 4).padStart(2, "0").slice(0, 2);
+                let month = date_string.substring(5, 7).padStart(2, "0").slice(0, 2);
+                let day = date_string.substring(8, 10).padStart(2, "0").slice(0, 2);
 
-                let hour = date_string.substring(11, 13);
-                let min = date_string.substring(14, 16);
-                let sec = date_string.substring(17, 19);
+                let hour = date_string.substring(11, 13).padStart(2, "0").slice(0, 2);
+                let min = date_string.substring(14, 16).padStart(2, "0").slice(0, 2);
+                let sec = parseInt(date_string.substring(17, 19)).toString().padStart(2, "0").slice(0, 2);
                 ms = parseInt(date_string.substring(20, 22));
 
                 let round_trip_time = end_time - start_time;
+                console.log("Round trip time: " + round_trip_time);
 
-                if ((ms + (round_trip_time / 10)) > 100) {
-                    alert_banner("API is slow, switching to local time");
-                    local = true;
-                    local_because_api_failed = true;
-                    local_get();
+                if ((ms + (round_trip_time)) > 100) {
+                    ms = (ms + (round_trip_time)) % 100;
+                    sec = (ms + (round_trip_time)) / 100;
+                    api_attempts = 0;
                     return;
                 } else {
                     ms += round_trip_time;
                 }
 
+                sec = Math.floor(sec).toString().padStart(2, "0").slice(0, 2);
+
                 ensure_ms();
 
-                document.getElementById("utc-time").innerHTML = `UTC ${utcTime.substring(11, 13).padStart(2, "0").slice(0, 2)}:${utcTime.substring(14, 16).padStart(2, "0").slice(0, 2)}:${utcTime.substring(17, 19).padStart(2, "0").slice(0, 2)}`.trim();
+                document.getElementById("utc-time").innerHTML = `UTC ${utcTime.substring(11, 13).padStart(2, "0").slice(0, 2)}:${utcTime.substring(14, 16).padStart(2, "0").slice(0, 2)}:${sec /* will be the same! */}`.trim();
 
                 document.getElementById("utc-ms").innerText = "." + parseInt(utcTime.substring(20, 22).padStart(2, "0").slice(0, 2)) % 100;
 
@@ -193,26 +190,37 @@ function getTime() {
                 document.getElementById("ms").innerHTML = "." + ms;
                 document.getElementById("source").innerHTML = "source: worldtimeapi.org";
 
+                let zone = offset.substring(0, 3);
+
+                let offsetMinutes = offset.substring(4);
+                let offsetFormatted = `${zone}:${offsetMinutes}`;
+
+                document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
+
                 document.title = `${hour}:${min}:${sec} ${offsetFormatted}`
             })
             .catch(error => {
                 if (local === false && !displayed) {
                     alert_banner("API failed, switching to local time");
                     displayed = true;
+                    local = true;
+                    local_because_api_failed = true;
+    
+                    local_get();
                 }
-                local = true;
-                local_because_api_failed = true;
-
-                local_get();
             });
     }
 
+    document.addEventListener("keyup", function (event) {
+        if (event.key==="l") {
+            console.log("Switcheroo")
+            switch_source();
+        }
+    });
 
     document.addEventListener("keydown", function (event) {
         switch (event.key) {
             case "l":
-                local = !local;
-                switch_source();
                 break;
 
             case "t":
