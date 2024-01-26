@@ -44,6 +44,8 @@ function switch_source() {
 function toggleTheme() {
     console.log("theme");
 
+    let old_normal = normal_color;
+
     document.body.classList.remove("dark-emergency");
     if (theme === "light") {
         theme = "dark";
@@ -56,6 +58,10 @@ function toggleTheme() {
     }
 
     document.body.classList.toggle("dark-mode");
+
+    if (!["dark", "light"].includes(old_normal)) {
+        normal_color = old_normal;
+    }
 
     // set css variable
     document.body.style.setProperty('--text-color', normal_color);
