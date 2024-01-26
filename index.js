@@ -21,19 +21,21 @@ function padZone(num) {
 }
 
 function switch_source() {
-    if (local === true) {
-        local_because_api_failed = false;
-    }
+    // if (local === true) {
+    //     local_because_api_failed = false;
+    // }
 
     local = !local;
 
-    document.getElementById("source").classList.add("no-after");
 
+    document.getElementById("source").classList.add("no-after");
 
     if (local === true) {
         document.getElementById("source").innerHTML = "source: new Date();";
+        disallow_update();
     } else {
         document.getElementById("source").innerHTML = "source: worldtimeapi.org";
+        allow_update();
     }
 
     getTime();
@@ -46,16 +48,17 @@ function toggleTheme() {
     if (theme === "light") {
         theme = "dark";
         document.getElementById("checker-actual").checked = true;
-        normal_color = "black";
+        normal_color = "white";
     } else {
         theme = "light";
-        normal_color = "white";
-
+        document.getElementById("checker-actual").checked = false;
+        normal_color = "black";
     }
 
-    normal_color = document.body.style.getPropertyValue('--text-color');
-
     document.body.classList.toggle("dark-mode");
+
+    // set css variable
+    document.body.style.setProperty('--text-color', normal_color);
 
     // save theme in local storage
     setCookie("theme", theme);
@@ -64,18 +67,6 @@ function toggleTheme() {
 function local_get() {
     console.log("local_get() called");
 
-    if (local_because_api_failed === true) {
-        api_attempts++;
-    }
-
-    if (api_attempts > 100 && local_because_api_failed === true) {
-        local = false;
-        local_because_api_failed = false;
-        api_attempts = 0;
-        getTime();
-    }
-
-    console.log("Switching to local time")
     let date = new Date();
     let year = date.getFullYear().toString().padStart(2, "0");
     let month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -105,14 +96,13 @@ function local_get() {
     document.getElementById("source").innerHTML = "source: new Date();";
 
     document.title = `${hour}:${min}:${sec} ${offsetFormatted}`;
+
+    console.log("local == ", local);
 }
 
 let api_attempts = 0;
 let displayed = false;
 
-function ensure_ms() {
-    ms = parseInt(ms.toString().padStart(2, "0").slice(0, 2));
-}
 
 let colors = [
     "aqua",
@@ -136,20 +126,33 @@ setInterval(() => {
     date_obj = new Date((new Date()).getTime() + diff_from_server);
 }, 10);
 
-setInterval(() => {
+let update_from_server = setInterval(() => {
     doWork().then((time) => {
         date_obj = new Date(time);
     });
 }, 1000);
+
+function allow_update() {
+    update_from_server = setInterval(() => {
+        doWork().then((time) => {
+            date_obj = new Date(time);
+        });
+    }, 1000);
+}
+
+function disallow_update() {
+    clearInterval(update_from_server);
+    diff_from_server = 0;
+}
 
 
 async function doLogic() {
     try {
         const response = await fetch('https://worldtimeapi.org/api/ip');
         const data = await response.json();
-        const serverTime = new Date(Date.parse(data.datetime));
-        const localTime = new Date();
-        diff_from_server = serverTime.getTime() - localTime.getTime();
+        const server_time = new Date(Date.parse(data.datetime));
+        const local_time = new Date();
+        diff_from_server = server_time.getTime() - local_time.getTime();
         return diff_from_server;
     }
     catch (e) {
@@ -164,7 +167,53 @@ async function doWork() {
     return date1.getTime();
 }
 
+document.addEventListener("keyup", function (event) {
+    if (event.key === "l") {
+        console.log("Switcheroo")
+        switch_source();
+    }
+});
+
+
+document.addEventListener("keydown", function (event) {
+    switch (event.key) {
+        case "l":
+            break;
+
+        case "t":
+            toggleTheme();
+            break;
+
+        case "n":
+            document.body.style.setProperty('--text-color', normal_color);
+            setCookie("color", normal_color);
+            break;
+
+        default:
+            for (let color of colors) {
+                console.log(color);
+                if (event.key === color[0]) {
+
+                    console.log("Changing color to " + color);
+
+                    document.body.style.setProperty('--text-color', color);
+
+                    setCookie("color", color);
+
+                }
+            };
+            break;
+    }
+});
+
 function getTime() {
+
+
+    if (local === true) {
+        local_get();
+        console.log("go local");
+        return;
+    }
 
     document.getElementById("date").innerHTML = date_obj.toLocaleDateString();
     document.getElementById("hr").innerHTML = date_obj.getHours().toString().padStart(2, "0") + ":";
@@ -188,44 +237,7 @@ function getTime() {
     document.title = `${date_obj.getHours().toString().padStart(2, "0")}:${date_obj.getMinutes().toString().padStart(2, "0")}:${date_obj.getSeconds().toString().padStart(2, "0")} ${offsetFormatted}`;
 
 
-    document.addEventListener("keyup", function (event) {
-        if (event.key === "l") {
-            console.log("Switcheroo")
-            switch_source();
-        }
-    });
-
-
-    document.addEventListener("keydown", function (event) {
-        switch (event.key) {
-            case "l":
-                break;
-
-            case "t":
-                toggleTheme();
-                break;
-
-            case "n":
-                document.body.style.setProperty('--text-color', normal_color);
-                setCookie("color", normal_color);
-                break;
-
-            default:
-                for (let color of colors) {
-                    console.log(color);
-                    if (event.key === color[0]) {
-
-                        console.log("Changing color to " + color);
-
-                        document.body.style.setProperty('--text-color', color);
-
-                        setCookie("color", color);
-
-                    }
-                };
-                break;
-        }
-    });
+    
 }
 
 
@@ -266,7 +278,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // get color from local storage
     let color = getCookie("color");
+    console.log(color);
     if (color === null) {
+
         color = normal_color;
     }
 

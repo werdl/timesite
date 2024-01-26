@@ -100,50 +100,17 @@
         <div id="how">
             <h1>how it works</h1>
             <p>
-                the time is fetched from either an api, or a local Date() object. it utilises round trip time
-                calculation, and makes exactly one request every second to the api. if it becomes too slow, it swaps to
-                a local Date() object. every two seconds, if there has been a problem with the api, it tries again. if
-                it succeeds, it swaps back to the api. if it fails, it continues to use the local Date() object.
+                every second, it calibrates the time difference between your computer and the server, and then every 10ms, if instantiates a new Date object, and adds the time difference to it
             </p>
             <br>
             <br>
             <h1>thanks</h1>
             <p>
                 thanks to uimaxbai/downloadfirefox - find him <a href="https://github.com/uimaxbai">here</a> on github -
-                for the project idea.
+                for the project idea
             </p>
         </div>
-
-
     </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // get theme from local storage
-            theme = getCookie("theme");
-            if (theme === null) {
-                theme = "light";
-            }
-
-            if (theme === "dark") {
-                document.body.classList.add("dark-emergency");
-            }
-            document.body.classList.toggle("dark-mode", theme === "dark");
-
-            // set the toggle switch to the correct position
-            document.getElementById("checker-actual").checked = theme === "dark";
-
-
-            // get color from local storage
-            let color = getCookie("color");
-            if (color === null) {
-                color = normal_color;
-            }
-
-            document.body.style.setProperty('--text-color', color);
-
-        });
-    </script>
     <script src="index.js"></script>
 </body>
 
