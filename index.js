@@ -48,7 +48,7 @@ function toggleTheme() {
 
     let old_normal = normal_color;
 
-    document.body.classList.remove("dark-emergency");
+    document.body.classList.remove("emergency");
     if (theme === "light") {
         theme = "dark";
         document.getElementById("checker-actual").checked = true;
@@ -67,12 +67,14 @@ function toggleTheme() {
 
     let color = getCookie("color");
     if (color) {
-        if (!( (color=="white" && theme=="light") || (color=="black" && theme=="dark"))) {
+        if (!((color == "white" && theme == "light") || (color == "black" && theme == "dark"))) {
             document.body.style.setProperty('--text-color', color);
         } else {
             setCookie("color", normal_color);
             document.body.style.setProperty('--text-color', normal_color);
         }
+    } else {
+        document.body.style.setProperty('--text-color', normal_color);
     }
 
     // save theme in local storage
@@ -126,10 +128,8 @@ let colors = [
     "green",
     "indigo",
     "magenta",
-    "orange",
     "purple",
     "red",
-    "silver",
     "violet",
     "yellow"
 ];
@@ -178,6 +178,7 @@ async function doLogic() {
 
 async function doWork() {
     let response = await doLogic();
+    console.log("successful request to server");
     let date1 = new Date((new Date()).getTime() + response);
     return date1.getTime();
 }
@@ -205,10 +206,33 @@ document.addEventListener("keydown", function (event) {
 
         case "g":
             window.location.replace("https://github.com/werdl/timesite")
+            break;
+
+        case "x":
+            let color = prompt("Enter a color (hex or name)");
+            document.body.style.setProperty('--text-color', color);
+
+            setCookie("color", color);
+            console.log("color is ", color);
+            break;
 
         case "n":
             document.body.style.setProperty('--text-color', normal_color);
             setCookie("color", normal_color);
+            break;
+
+        case "o":
+            if (document.body.style.opacity === "0.25") {
+                document.body.style.opacity = "1";
+            } else {
+                document.body.style.opacity = "0.25";
+            }
+            break;
+
+        case "s":
+            doWork().then((time) => {
+                date_obj = new Date(time);
+            });
             break;
 
         default:
@@ -259,12 +283,14 @@ function getTime() {
     document.title = `${date_obj.getHours().toString().padStart(2, "0")}:${date_obj.getMinutes().toString().padStart(2, "0")}:${date_obj.getSeconds().toString().padStart(2, "0")} ${offsetFormatted}`;
 
 
-    
+
 }
 
 
 function setCookie(key, value) {
+    console.log("setting cookie");
     document.cookie = `${key}=${value}; expires=Fri, 31 Dec 9999 23:59:59 GMT`;
+    console.log(document.cookie);
 }
 
 function getCookie(key) {
@@ -295,9 +321,8 @@ document.addEventListener("DOMContentLoaded", function () {
         theme = "light";
     }
 
-    if (theme === "dark") {
-        document.body.classList.add("dark-emergency");
-    }
+    document.body.classList.add("emergency"); // this is to prevent the flash of light mode when the page loads
+
     document.body.classList.toggle("dark-mode", theme === "dark");
 
     // set the toggle switch to the correct position
@@ -322,5 +347,3 @@ document.addEventListener("DOMContentLoaded", function () {
 
 getTime();
 setInterval(getTime, 10);
-
-

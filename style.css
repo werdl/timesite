@@ -30,11 +30,10 @@
     font-display: swap;
 }
 
-body.dark-emergency {
-    --bg-color: #000;
-    --text-color: #fff;
+body.emergency {
     transition: none !important;
 }
+
 
 body {
     background-color: var(--bg-color);
