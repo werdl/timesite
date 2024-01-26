@@ -41,6 +41,8 @@ function switch_source() {
     getTime();
 }
 
+
+
 function toggleTheme() {
     console.log("theme");
 
@@ -57,14 +59,21 @@ function toggleTheme() {
         normal_color = "black";
     }
 
-    document.body.classList.toggle("dark-mode");
+    document.body.classList.add(theme === "dark" ? "dark-mode" : "light-mode");
+    document.body.classList.remove(theme === "dark" ? "light-mode" : "dark-mode");
 
-    if (!["dark", "light"].includes(old_normal)) {
-        normal_color = old_normal;
+    normal_color = theme === "dark" ? "white" : "black";
+
+
+    let color = getCookie("color");
+    if (color) {
+        if (!( (color=="white" && theme=="light") || (color=="black" && theme=="dark"))) {
+            document.body.style.setProperty('--text-color', color);
+        } else {
+            setCookie("color", normal_color);
+            document.body.style.setProperty('--text-color', normal_color);
+        }
     }
-
-    // set css variable
-    document.body.style.setProperty('--text-color', normal_color);
 
     // save theme in local storage
     setCookie("theme", theme);
@@ -186,9 +195,16 @@ document.addEventListener("keydown", function (event) {
         case "l":
             break;
 
+        case "h":
+            toggleHelp();
+            break;
+
         case "t":
             toggleTheme();
             break;
+
+        case "g":
+            window.location.replace("https://github.com/werdl/timesite")
 
         case "n":
             document.body.style.setProperty('--text-color', normal_color);
@@ -262,9 +278,15 @@ function getCookie(key) {
     return null;
 }
 
-getTime();
-setInterval(getTime, 10);
-
+function toggleHelp() {
+    // if on help.html, go to index.html
+    let paths = window.location.pathname.split("/");
+    if (paths[paths.length - 1] === "help.html") {
+        window.location.replace("index.html");
+    } else {
+        window.location.replace("help.html");
+    }
+}
 
 document.addEventListener("DOMContentLoaded", function () {
     // get theme from local storage
@@ -281,6 +303,9 @@ document.addEventListener("DOMContentLoaded", function () {
     // set the toggle switch to the correct position
     document.getElementById("checker-actual").checked = theme === "dark";
 
+    normal_color = theme === "dark" ? "white" : "black";
+    document.body.style.setProperty('--text-color', normal_color);
+    console.log("normal color is ", normal_color);
 
     // get color from local storage
     let color = getCookie("color");
@@ -293,3 +318,9 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.style.setProperty('--text-color', color);
 
 });
+
+
+getTime();
+setInterval(getTime, 10);
+
+
