@@ -280,7 +280,7 @@ function getTime() {
         local_get();
         console.log("go local");
         return;
-    } 
+    }
 
     if (!local && diff_from_server === 0) {
         alert_banner("Calibrating...");
