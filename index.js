@@ -4,13 +4,18 @@ let theme = "light";
 let ms = 0;
 let normal_color = "";
 
-function alert_banner(text) {
+function alert_banner(text, timeout = 5000) {
     document.getElementById("alert-banner-text").innerHTML = text;
     document.getElementById("alert-banner").style.display = "flex";
+    setTimeout(() => {
+        close_banner(text);
+    }, timeout);
 }
 
-function close_banner() {
-    document.getElementById("alert-banner").style.display = "none";
+function close_banner(text) {
+    if (document.getElementById("alert-banner-text").innerHTML === text) {
+        document.getElementById("alert-banner").style.display = "none";
+    }
 }
 
 function padZone(num) {
@@ -140,7 +145,7 @@ let diff_from_server = 0;
 
 setInterval(() => {
     date_obj = new Date((new Date()).getTime() + diff_from_server);
-    close_banner();
+    close_banner("Calibrating...", 100000);
 }, 10);
 
 let update_from_server = setInterval(() => {
@@ -235,6 +240,20 @@ document.addEventListener("keydown", function (event) {
             doWork().then((time) => {
                 date_obj = new Date(time);
             });
+            break;
+
+        case "d":
+            if (diff_from_server === 0) {
+                if (local === true) {
+                    alert_banner("You are using local time!");
+                } else {
+                    alert_banner("Your computer is exact!");
+                }
+            } else if (diff_from_server < 0) { // inverse, as it is the amount we have to add to the local time to get the server time
+                alert_banner(`Your computer is ${diff_from_server}ms ahead of the server`);
+            } else {
+                alert_banner(`Your computer is ${diff_from_server}ms behind the server`);
+            }
             break;
 
         default:
