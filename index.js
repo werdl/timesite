@@ -7,9 +7,10 @@ let normal_color = "";
 function alert_banner(text) {
     document.getElementById("alert-banner-text").innerHTML = text;
     document.getElementById("alert-banner").style.display = "flex";
-    setTimeout(function () {
-        document.getElementById("alert-banner").style.display = "none";
-    }, 5000);
+}
+
+function close_banner() {
+    document.getElementById("alert-banner").style.display = "none";
 }
 
 function padZone(num) {
@@ -139,6 +140,7 @@ let diff_from_server = 0;
 
 setInterval(() => {
     date_obj = new Date((new Date()).getTime() + diff_from_server);
+    close_banner();
 }, 10);
 
 let update_from_server = setInterval(() => {
@@ -259,6 +261,10 @@ function getTime() {
         local_get();
         console.log("go local");
         return;
+    } 
+
+    if (!local && diff_from_server === 0) {
+        alert_banner("Calibrating...");
     }
 
     document.getElementById("date").innerHTML = date_obj.toLocaleDateString();
