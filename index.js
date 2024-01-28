@@ -27,12 +27,8 @@ function padZone(num) {
 }
 
 function switch_source() {
-    // if (local === true) {
-    //     local_because_api_failed = false;
-    // }
 
     local = !local;
-
 
     document.getElementById("source").classList.add("no-after");
 
@@ -46,8 +42,6 @@ function switch_source() {
 
     getTime();
 }
-
-
 
 function toggleTheme() {
     console.log("theme");
@@ -69,7 +63,6 @@ function toggleTheme() {
     document.body.classList.remove(theme === "dark" ? "light-mode" : "dark-mode");
 
     normal_color = theme === "dark" ? "white" : "black";
-
 
     let color = getCookie("color");
     if (color) {
@@ -126,7 +119,6 @@ function local_get() {
 let api_attempts = 0;
 let displayed = false;
 
-
 let colors = [
     "aqua",
     "blue",
@@ -167,7 +159,6 @@ function disallow_update() {
     diff_from_server = 0;
 }
 
-
 async function doLogic() {
     try {
         const response = await fetch('https://worldtimeapi.org/api/ip');
@@ -176,8 +167,7 @@ async function doLogic() {
         const local_time = new Date();
         diff_from_server = server_time.getTime() - local_time.getTime();
         return diff_from_server;
-    }
-    catch (e) {
+    } catch (e) {
         console.error(e);
         return diff_from_server;
     }
@@ -190,15 +180,14 @@ async function doWork() {
     return date1.getTime();
 }
 
-document.addEventListener("keyup", function (event) {
+document.addEventListener("keyup", function(event) {
     if (event.key === "l") {
         console.log("Switcheroo")
         switch_source();
     }
 });
 
-
-document.addEventListener("keydown", function (event) {
+document.addEventListener("keydown", function(event) {
     switch (event.key) {
         case "l":
             break;
@@ -243,6 +232,7 @@ document.addEventListener("keydown", function (event) {
             break;
 
         case "d":
+            console.log("diff from server is ", diff_from_server);
             if (diff_from_server === 0) {
                 if (local === true) {
                     alert_banner("You are using local time!");
@@ -275,7 +265,6 @@ document.addEventListener("keydown", function (event) {
 
 function getTime() {
 
-
     if (local === true) {
         local_get();
         console.log("go local");
@@ -307,10 +296,7 @@ function getTime() {
 
     document.title = `${date_obj.getHours().toString().padStart(2, "0")}:${date_obj.getMinutes().toString().padStart(2, "0")}:${date_obj.getSeconds().toString().padStart(2, "0")} ${offsetFormatted}`;
 
-
-
 }
-
 
 function setCookie(key, value) {
     console.log("setting cookie");
@@ -339,7 +325,7 @@ function toggleHelp() {
     }
 }
 
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function() {
     // get theme from local storage
     theme = getCookie("theme");
     if (theme === null) {
@@ -368,7 +354,6 @@ document.addEventListener("DOMContentLoaded", function () {
     document.body.style.setProperty('--text-color', color);
 
 });
-
 
 getTime();
 setInterval(getTime, 10);
