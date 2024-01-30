@@ -12,11 +12,11 @@ function alert_banner(text) {
     document.getElementById("alert-banner").style.display = "flex";
     setTimeout(() => {
         close_banner(text);
-    }, timeout);
+    }, 5000);
 }
 
 function close_banner(text) {
-    if (document.getElementById("alert-banner-text").innerHTML === text) {
+    if (document.getElementById("alert-banner-text").innerHTML === text || text === undefined) {
         document.getElementById("alert-banner").style.display = "none";
     }
 }
@@ -41,6 +41,7 @@ function switch_source() {
     } else {
         document.getElementById("source").innerHTML = "source: worldtimeapi.org";
         allow_update();
+        close_banner();
     }
 
     getTime();
