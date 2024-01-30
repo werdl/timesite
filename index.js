@@ -4,7 +4,10 @@ let theme = "light";
 let ms = 0;
 let normal_color = "";
 
-function alert_banner(text, timeout = 5000) {
+function alert_banner(text) {
+    if (document.getElementById("alert-banner").style.display === "flex") {
+        return;
+    }
     document.getElementById("alert-banner-text").innerHTML = text;
     document.getElementById("alert-banner").style.display = "flex";
     setTimeout(() => {
