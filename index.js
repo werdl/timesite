@@ -1,5 +1,6 @@
 let local = false;
 let local_because_api_failed = false;
+let display_local_not_utc = false;
 let theme = "light";
 let ms = 0;
 let normal_color = "";
@@ -21,16 +22,7 @@ function close_banner(text) {
     }
 }
 
-function padZone(num) {
-    if (num >= 0) {
-        return "+" + num.toString().padStart(2, "0");
-    } else {
-        return "-" + num.toString().padStart(2, "0");
-    }
-}
-
 function switch_source() {
-
     local = !local;
 
     document.getElementById("source").classList.add("no-after");
@@ -39,7 +31,7 @@ function switch_source() {
         document.getElementById("source").innerHTML = "source: new Date();";
         disallow_update();
     } else {
-        document.getElementById("source").innerHTML = "source: worldtimeapi.org";
+        document.getElementById("source").innerHTML = "source: ntpjs.org";
         allow_update();
         close_banner();
     }
@@ -106,13 +98,18 @@ function local_get() {
     let offset = date.getTimezoneOffset();
     let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    let offsetFormatted = `${padZone(offset / 60)}:${(offset % 60).toString().padStart(2, "0")}`;
+    let offsetFormatted = `${offset / 60}:${(offset % 60).toString().padStart(2, "0")}`;
 
     document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
 
-    document.getElementById("utc-time").innerHTML = `UTC ${date.getUTCHours().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCMinutes().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCSeconds().toString().padStart(2, "0").slice(0, 2)}`.trim();
+    if (display_local_not_utc) {
+        document.getElementById("utc-time").innerHTML = `Local ${hour}:${min}:${sec}`.trim();
+        document.getElementById("utc-ms").innerText = "." + ms;
+    } else {
+        document.getElementById("utc-time").innerHTML = `UTC ${date.getUTCHours().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCMinutes().toString().padStart(2, "0").slice(0, 2)}:${date.getUTCSeconds().toString().padStart(2, "0").slice(0, 2)}`.trim();
+        document.getElementById("utc-ms").innerText = "." + date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2);
+    }
 
-    document.getElementById("utc-ms").innerText = "." + date.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2);
     document.getElementById("source").innerHTML = "source: new Date();";
 
     document.title = `${hour}:${min}:${sec} ${offsetFormatted}`;
@@ -164,15 +161,46 @@ function disallow_update() {
 }
 
 async function doLogic() {
+    // example response: __ntpjs({"now":1743788518.065437,"backoff":384,"__server":"amslhr"});
+    // strip off __ntpjs( and );
     try {
-        const response = await fetch('https://worldtimeapi.org/api/ip');
-        const data = await response.json();
-        const server_time = new Date(Date.parse(data.datetime));
-        const local_time = new Date();
-        diff_from_server = server_time.getTime() - local_time.getTime();
+        let response = await fetch("https://use.ntpjs.org/v1/time.js");
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        // console.log(await response.text());
+
+        let data = await response.text();
+        console.log(data);
+
+        // now strip off __ntpjs( and );
+        let data_stripped = data.slice(8,-2);
+        console.log(data_stripped);
+        data = JSON.parse(data_stripped);
+        console.log(data_stripped);
+
+        if (data.now === undefined) {
+            console.log("No data");
+            local_because_api_failed = true;
+            local = true;
+            disallow_update();
+            local_get();
+            return;
+        }
+
+        date_obj = new Date(data.now * 1000);
+        console.log("date_obj is ", date_obj);
+
+        let local_time = new Date();
+        let local_time_ms = local_time.getTime();
+        let server_time_ms = data.now * 1000;
+        console.log("local_time_ms is ", local_time_ms);
+        console.log("server_time_ms is ", server_time_ms);
+        diff_from_server = server_time_ms - local_time_ms;
+
         return diff_from_server;
     } catch (e) {
-        console.error(e);
+        console.log("Server failure: ",e);
         return diff_from_server;
     }
 }
@@ -194,6 +222,10 @@ document.addEventListener("keyup", function(event) {
 document.addEventListener("keydown", function(event) {
     switch (event.key) {
         case "l":
+            break;
+
+        case "u":
+            display_local_not_utc = !display_local_not_utc;
             break;
 
         case "h":
@@ -288,15 +320,20 @@ function getTime() {
     let offset = date_obj.getTimezoneOffset();
     let zone_name = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-    let offsetFormatted = `${padZone(offset / 60)}:${(offset % 60).toString().padStart(2, "0")}`;
+    let offsetFormatted = `${offset / 60}:${(offset % 60).toString().padStart(2, "0")}`;
 
     document.getElementById("zone").innerHTML = `${zone_name} (UTC${offsetFormatted})`;
 
-    document.getElementById("utc-time").innerHTML = `UTC ${date_obj.getUTCHours().toString().padStart(2, "0").slice(0, 2)}:${date_obj.getUTCMinutes().toString().padStart(2, "0").slice(0, 2)}:${date_obj.getUTCSeconds().toString().padStart(2, "0").slice(0, 2)}`.trim();
+    if (display_local_not_utc) {
+        let local_time = new Date();
+        document.getElementById("utc-time").innerHTML = `Local ${local_time.getHours().toString().padStart(2, "0")}:${local_time.getMinutes().toString().padStart(2, "0")}:${local_time.getSeconds().toString().padStart(2, "0")}`.trim();
+        document.getElementById("utc-ms").innerText = "." + local_time.getMilliseconds().toString().padStart(2, "0").slice(0, 2);
+    } else {
+        document.getElementById("utc-time").innerHTML = `UTC ${date_obj.getUTCHours().toString().padStart(2, "0")}:${date_obj.getUTCMinutes().toString().padStart(2, "0")}:${date_obj.getUTCSeconds().toString().padStart(2, "0")}`.trim();
+        document.getElementById("utc-ms").innerText = "." + date_obj.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2);
+    }
 
-    document.getElementById("utc-ms").innerText = "." + date_obj.getUTCMilliseconds().toString().padStart(2, "0").slice(0, 2);
-
-    document.getElementById("source").innerHTML = "source: worldtimeapi.org";
+    document.getElementById("source").innerHTML = "source: ntpjs.org";
 
     document.title = `${date_obj.getHours().toString().padStart(2, "0")}:${date_obj.getMinutes().toString().padStart(2, "0")}:${date_obj.getSeconds().toString().padStart(2, "0")} ${offsetFormatted}`;
 
@@ -359,5 +396,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
 });
 
+doWork();
 getTime();
 setInterval(getTime, 10);
