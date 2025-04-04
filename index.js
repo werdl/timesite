@@ -24,6 +24,7 @@ function close_banner(text) {
 
 function switch_source() {
     local = !local;
+    setCookie("local", local);
 
     document.getElementById("source").classList.add("no-after");
 
@@ -181,10 +182,7 @@ async function doLogic() {
 
         if (data.now === undefined) {
             console.log("No data");
-            local_because_api_failed = true;
-            local = true;
-            disallow_update();
-            local_get();
+            switch_source();
             return;
         }
 
@@ -226,6 +224,7 @@ document.addEventListener("keydown", function(event) {
 
         case "u":
             display_local_not_utc = !display_local_not_utc;
+            setCookie("display_local_not_utc", display_local_not_utc);
             break;
 
         case "h":
@@ -269,16 +268,17 @@ document.addEventListener("keydown", function(event) {
 
         case "d":
             console.log("diff from server is ", diff_from_server);
-            if (diff_from_server === 0) {
+            let diff_to_2_dp = Math.round(diff_from_server * 100) / 100;
+            if (diff_to_2_dp === 0) {
                 if (local === true) {
                     alert_banner("You are using local time!");
                 } else {
                     alert_banner("Your computer is exact!");
                 }
-            } else if (diff_from_server < 0) { // inverse, as it is the amount we have to add to the local time to get the server time
-                alert_banner(`Your computer is ${diff_from_server}ms ahead of the server`);
+            } else if (diff_to_2_dp < 0) { // inverse, as it is the amount we have to add to the local time to get the server time
+                alert_banner(`Your computer is ${-diff_to_2_dp}ms ahead of the server`);
             } else {
-                alert_banner(`Your computer is ${diff_from_server}ms behind the server`);
+                alert_banner(`Your computer is ${-diff_to_2_dp}ms behind the server`);
             }
             break;
 
@@ -300,7 +300,6 @@ document.addEventListener("keydown", function(event) {
 });
 
 function getTime() {
-
     if (local === true) {
         local_get();
         console.log("go local");
@@ -371,6 +370,19 @@ document.addEventListener("DOMContentLoaded", function() {
     theme = getCookie("theme");
     if (theme === null) {
         theme = "light";
+    }
+
+    // get local + display local time over utc from local storage
+    local = getCookie("local") === "true";
+    if (local === null) {
+        local = false;
+    }
+    console.log("local is ", local);
+
+    // get display local time over utc from local storage
+    display_local_not_utc = getCookie("display_local_not_utc") === "true";
+    if (display_local_not_utc === null) {
+        display_local_not_utc = false;
     }
 
     document.body.classList.add("emergency"); // this is to prevent the flash of light mode when the page loads
