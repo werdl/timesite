@@ -8,6 +8,7 @@
     font-weight: normal;
     font-style: normal;
     font-display: swap;
+    font-feature-settings: "ss02", "zero";
 }
 
 @font-face {
@@ -20,7 +21,7 @@
     font-weight: bold;
     font-style: normal;
     font-display: swap;
-    font-feature-settings: "zero" on;
+    font-feature-settings: "ss02", "zero";
 }
 
 @font-face {
